@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empresa de Consórcios</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500&family=Montserrat:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <style>
+               /* Estilos gerais */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+/* Cabeçalho fixo */
+.fixed-header {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background: linear-gradient(45deg, #2d2d2d, #757575);
+    color: white;
+    padding: 20px 60px; /* Ajustado para cabeçalho mais enxuto */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Logo */
+.fixed-header .logo {
+    width: 130px; /* Ajuste no tamanho do logo */
+    height: 130px;
+    border-radius: 50%;
+    background-color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.fixed-header .logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+/* Navegação */
+.fixed-header nav {
+    display: flex;
+    justify-content: center; /* Navegação centralizada */
+    align-items: center;
+    margin-right: 100px;
+}
+
+.fixed-header nav ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 40px;
+}
+
+.fixed-header nav ul li {
+    display: inline;
+}
+
+.fixed-header nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 20px; /* Reduziu o tamanho da fonte */
+    font-weight: bold;
+    transition: color 0.3s ease;
+}
+
+.fixed-header nav ul li a:hover {
+    color: #f0a500; /* Cor de destaque ao passar o mouse */
+}
+
+.fixed-header nav ul li a:active {
+    color: #ff3f3f; /* Cor ao clicar no link */
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .fixed-header nav ul {
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+    }
+
+    .fixed-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .fixed-header .logo {
+        margin-bottom: 20px;
+    }
+}
+
+/* Banner Carrossel Infinito */
+.banner {
+    position: relative;
+    margin-top: 150px;
+    width: 100%;
+    height: 60vh;
+    overflow: hidden;
+}
+
+.banner-slider {
+    display: flex;
+    width: 300%;
+    height: 100%;
+    transition: transform 1s ease-in-out;
+}
+
+.slide {
+    width: 100vw;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: white;
+    background-size: cover;
+    background-position: center;
+    flex-shrink: 0;
+}
+
+.banner-content {
+    align-self: center;
+    background-color: #00000085;
+    backdrop-filter: blur(10px);
+    padding: 30px;
+    border-radius: 10px;
+}
+
+.cta-button {
+    display: inline-block;
+    background: #28a745;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 15px;
+}
+
+@keyframes slide {
+    0% { transform: translateX(0); }
+    33% { transform: translateX(-100vw); }
+    66% { transform: translateX(-200vw); }
+    100% { transform: translateX(0); }
+}
+
+/* Indicadores */
+.carousel-indicators {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+}
+
+.carousel-indicator {
+    width: 12px;
+    height: 12px;
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.carousel-indicator.active {
+    background-color: white;
+}
+
+/* Botão do WhatsApp */
+.whatsapp-button {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background: #25d366;
+    color: white;
+    padding: 15px;
+    border-radius: 50%;
+    text-align: center;
+    font-size: 20px;
+    text-decoration: none;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.whatsapp-button.pulse {
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* Seção de Sobre */
+#sobre {
+    padding: 80px 20px;
+    background-color: #ffffff;
+    color: #333;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#sobre h2 {
+    font-size: 36px;
+    color: #333;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+#sobre p {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #666;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+#sobre img {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 40px;
+}
+
+/* Ajuste nos botões, para que fiquem abaixo da imagem */
+#sobre .cta-button-container {
+    margin-top: 20px; /* Adiciona um espaço acima dos botões */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza os botões */
+    gap: 15px; /* Adiciona um espaço entre os botões */
+}
+
+/* Seção de Serviços */
+#servicos {
+    padding: 80px 20px;
+    background-color: #f1f1f1;
+    color: #333;
+    text-align: center;
+}
+
+#servicos h2 {
+    font-size: 36px;
+    color: #003366; /* Azul escuro */
+    margin-bottom: 40px;
+    font-weight: 700;
+}
+
+#servicos ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+#servicos ul li {
+    width: 30%;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    text-align: center;
+    transition: background-color 0.3s;
+}
+
+#servicos ul li h3 {
+    font-size: 24px;
+    color: #003366;
+    margin-bottom: 15px;
+}
+
+#servicos ul li p {
+    font-size: 16px;
+    color: #666;
+}
+
+#servicos ul li:hover {
+    background-color: #f0f0f0; /* Efeito de hover */
+}
+
+/* Seção de Contato */
+#contato {
+    padding: 80px 20px;
+    background-color: #ffffff;
+    color: #333;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#contato h2 {
+    font-size: 36px;
+    color: #333;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+#contato p {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #666;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+#contato img {
+    width: 100%;
+    max-width: 600px;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 40px;
+}
+
+/* Ajuste nos botões, para que fiquem abaixo da imagem */
+#contato .cta-button-container {
+    margin-top: 20px; /* Adiciona um espaço acima dos botões */
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centraliza os botões */
+    gap: 15px; /* Adiciona um espaço entre os botões */
+}
+
+/* Botões */
+.cta-button {
+    background-color: #f0a500;
+    padding: 12px 30px;
+    border-radius: 30px;
+    font-size: 16px;
+    color: white;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+    display: inline-block;
+}
+
+.cta-button:hover {
+    background-color: #e68900;
+}
+
+.whatsapp-button {
+    background: #25d366;
+    padding: 15px;
+    border-radius: 50%;
+    font-size: 20px;
+    text-decoration: none;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+/* Ajuste para telas menores */
+@media (max-width: 768px) {
+    #contato .cta-button-container {
+        margin-top: 30px; /* Dá mais espaço para os botões nas telas menores */
+    }
+}
+
+/* Rodapé */
+footer {
+    background-color: #2d2d2d;
+    color: white;
+    padding: 40px 20px;
+    text-align: center;
+    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+}
+
+footer .footer-content {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 40px;
+}
+
+footer .footer-content .section {
+    max-width: 300px;
+    width: 100%;
+}
+
+footer .footer-content .section h3 {
+    font-size: 24px;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+footer .footer-content .section p,
+footer .footer-content .section a {
+    font-size: 16px;
+    color: #ccc;
+    margin-bottom: 10px;
+    text-decoration: none;
+}
+
+footer .footer-content .section a:hover {
+    color: #f0a500;
+}
+
+/* Ícones das Redes Sociais */
+footer .social-icons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+footer .social-icons a {
+    color: white;
+    font-size: 24px;
+    transition: color 0.3s ease;
+}
+
+footer .social-icons a:hover {
+    color: #f0a500;
+}
+
+/* Copyright */
+footer .copyright {
+    margin-top: 40px;
+    font-size: 14px;
+    color: #ccc;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    footer .footer-content {
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+    }
+
+    footer .footer-content .section {
+        text-align: center;
+    }
+}
+
+
+    </style>
+</head>
+<body>
+    <header class="fixed-header">
+        <!-- Logo -->
+        <div class="logo">
+            <img src="images/grande transparente.png" alt="Logo da Empresa"> <!-- Substitua pelo caminho do seu logo -->
+        </div>
+
+        <!-- Navegação -->
+        <nav>
+            <ul>
+                <li><a href="#sobre">Sobre</a></li>
+                <li><a href="#servicos">Serviços</a></li>
+                <li><a href="#contato">Contato</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <div class="banner" id="banner">
+        <div class="banner-slider" id="bannerSlider">
+            <div class="slide" style="background-image: url('images/banner1.jpg');">
+                <div class="banner-content">
+                    <h1>Bem-vindo à Nossa Empresa</h1>
+                    <p>Trabalhamos com terceirização de consórcios.</p>
+                    <a href="#" class="cta-button">Saiba Mais</a>
+                </div>
+            </div>
+            <div class="slide" style="background-image: url('images/banner2.jpg');">
+                <div class="banner-content">
+                    <h1>Soluções Inteligentes</h1>
+                    <p>Facilitamos seu consórcio com transparência.</p>
+                    <a href="#" class="cta-button">Entre em Contato</a>
+                </div>
+            </div>
+            <div class="slide" style="background-image: url('images/banner3.jpg');">
+                <div class="banner-content">
+                    <h1>Seja Nosso Parceiro</h1>
+                    <p>Expanda seus negócios com nossos serviços.</p>
+                    <a href="#" class="cta-button">Fale Conosco</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="carousel-indicators" id="carouselIndicators">
+            <div class="carousel-indicator active" data-index="0"></div>
+            <div class="carousel-indicator" data-index="1"></div>
+            <div class="carousel-indicator" data-index="2"></div>
+        </div>
+    </div>
+    
+    <!-- Seção Sobre -->
+    <div id="sobre">
+        <h2>Sobre Nós</h2>
+        <p>Somos uma empresa focada em fornecer soluções inovadoras e de qualidade para nossos clientes.</p>
+        <img src="images/about.jpg" alt="Imagem Sobre Nós">
+        <div class="cta-button-container">
+            <a href="#" class="cta-button">Saiba Mais</a>
+        </div>
+    </div>
+
+    <!-- Seção de Serviços -->
+    <section id="servicos">
+        <h2>Nossos Serviços</h2>
+        <ul>
+            <li>
+                <h3>Consórcios de Veículos</h3>
+                <p>Planeje sua aquisição de veículos com segurança e sem taxas extras.</p>
+            </li>
+            <li>
+                <h3>Consórcios Imobiliários</h3>
+                <p>Conquiste seu imóvel com tranquilidade e sem burocracia.</p>
+            </li>
+            <li>
+                <h3>Planejamento Financeiro</h3>
+                <p>Consultoria especializada para sua estabilidade financeira.</p>
+            </li>
+        </ul>
+    </section>
+
+    <!-- Seção Contato -->
+    <div id="contato">
+        <h2>Entre em contato conosco</h2>
+        <p>Descreva um pouco sobre como podemos ajudar sua empresa a crescer.</p>
+        <img src="images/contact.jpg" alt="Imagem de Contato">
+        <div class="cta-button-container">
+            <a href="#" class="cta-button">Entre em contato</a>
+        </div>
+    </div>
+    
+    <a href="https://wa.me/seunumero" class="whatsapp-button" target="_blank">WhatsApp</a>
+
+    <footer>
+        <div class="footer-content">
+            <!-- Seção de Contato -->
+            <div class="section">
+                <h3>Contato</h3>
+                <p><strong>Telefone:</strong> (XX) XXXX-XXXX</p>
+                <p><strong>Email:</strong> contato@empresa.com</p>
+                <p><strong>Endereço:</strong> Rua Exemplo, 123, Cidade, Estado</p>
+            </div>
+    
+            <!-- Seção de Links Importantes -->
+            <div class="section">
+                <h3>Links Importantes</h3>
+                <a href="#sobre">Sobre Nós</a>
+                <a href="#servicos">Serviços</a>
+                <a href="#contato">Contato</a>
+                <a href="#">Política de Privacidade</a>
+            </div>
+    
+            <!-- Seção de Redes Sociais -->
+            <div class="section">
+                <h3>Siga-nos</h3>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com" target="_blank" class="fab fa-facebook-f"></a>
+                    <a href="https://www.twitter.com" target="_blank" class="fab fa-twitter"></a>
+                    <a href="https://www.instagram.com" target="_blank" class="fab fa-instagram"></a>
+                </div>
+            </div>
+        </div>
+    
+        <!-- Copyright -->
+        <div class="copyright">
+            <p>&copy; 2025 DM Evolution. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const bannerSlider = document.getElementById("bannerSlider");
+            const slides = document.querySelectorAll('.slide');
+            const indicators = document.querySelectorAll('.carousel-indicator');
+            const totalSlides = slides.length;
+
+            // Clonando as primeiras slides para criar o efeito infinito
+            const firstSlide = slides[0].cloneNode(true);
+            const secondSlide = slides[1].cloneNode(true);
+            const thirdSlide = slides[2].cloneNode(true);
+
+            // Colocando as clones no final
+            bannerSlider.appendChild(firstSlide);
+            bannerSlider.appendChild(secondSlide);
+            bannerSlider.appendChild(thirdSlide);
+
+            // Função para controlar a animação do carrossel
+            let currentIndex = 0;
+            let interval;
+
+            function moveCarousel() {
+                currentIndex++;
+                bannerSlider.style.transform = `translateX(-${100 * currentIndex}vw)`;
+
+                // Atualizar indicadores
+                updateIndicators(currentIndex);
+
+                // Após a transição, se chegou ao final, volta para o início sem animação
+                if (currentIndex === totalSlides) {
+                    setTimeout(() => {
+                        bannerSlider.style.transition = 'none'; // Retira a transição
+                        bannerSlider.style.transform = `translateX(0)`;
+                    }, 1000); // Aguarda 1 segundo para transição
+                    setTimeout(() => {
+                        bannerSlider.style.transition = 'transform 1s ease-in-out'; // Restaura a transição
+                    }, 1100);
+                    currentIndex = 0;
+                }
+            }
+
+            // Atualizar indicadores
+            function updateIndicators(index) {
+                indicators.forEach((indicator, i) => {
+                    indicator.classList.remove('active');
+                    if (i === index % totalSlides) {
+                        indicator.classList.add('active');
+                    }
+                });
+            }
+
+            // Clique nos indicadores
+            indicators.forEach(indicator => {
+                indicator.addEventListener('click', () => {
+                    currentIndex = parseInt(indicator.getAttribute('data-index'));
+                    bannerSlider.style.transform = `translateX(-${100 * currentIndex}vw)`;
+                    updateIndicators(currentIndex);
+                });
+            });
+
+            // Iniciar o intervalo de movimento do carrossel
+            function startCarousel() {
+                interval = setInterval(moveCarousel, 3000); // Muda a cada 3 segundos
+            }
+
+            // Pausar o carrossel quando o mouse entra
+            banner.addEventListener('mouseenter', function () {
+                clearInterval(interval);
+            });
+
+            // Retornar o carrossel quando o mouse sai
+            banner.addEventListener('mouseleave', function () {
+                startCarousel();
+            });
+
+            // Iniciar o carrossel assim que a página carregar
+            startCarousel();
+        });
+    </script>
+</body>
+</html>
