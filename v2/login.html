@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <!-- Importando o Tailwind via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex justify-center items-center min-h-screen">
+  <div class="bg-white p-8 rounded-xl shadow-lg w-96">
+    <h1 class="text-2xl font-bold text-center text-gray-800 mb-4">Login</h1>
+    <form id="login-form" class="space-y-4">
+      <input type="email" id="email" placeholder="Email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+      <input type="password" id="password" placeholder="Senha" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500" required>
+      <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition-colors">Entrar</button>
+    </form>
+    <!-- Opção de recuperar senha -->
+    <p class="text-center text-sm text-gray-600 mt-4">
+      <a href="#" id="recover-password" class="text-indigo-600 hover:text-indigo-700">Esqueceu sua senha?</a>
+    </p>
+  </div>
+
+  <!-- Importando o Firebase e módulos JS -->
+  <script type="module">
+    // Configuração do Firebase
+    import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAznTyn2JKhPuM2QOJH91r_k3pl89WtiV8",
+      authDomain: "dmevolution-7639a.firebaseapp.com",
+      projectId: "dmevolution-7639a",
+      storageBucket: "dmevolution-7639a.firebasestorage.app",
+      messagingSenderId: "1060243812509",
+      appId: "1:1060243812509:web:f58d7a5f7c52562e946474"
+    };
+
+    // Inicializando o Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Selecionando o formulário de login e o link de recuperar senha
+    const loginForm = document.getElementById('login-form');
+    const recoverPasswordLink = document.getElementById('recover-password');
+
+    // Função para lidar com o login
+    loginForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      // Tentando fazer login com Firebase
+      signInWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // Login bem-sucedido
+          alert('Login realizado com sucesso!');
+          console.log(userCredential.user);
+
+          // Redirecionando para a página de administração
+          window.location.href = 'adm.html';  // Aqui ocorre o redirecionamento
+        })
+        .catch((error) => {
+          const errorMessage = error.message;
+          alert('Erro: ' + errorMessage);
+        });
+    });
+
+    // Função para lidar com a recuperação de senha
+    recoverPasswordLink.addEventListener('click', (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      if (!email) {
+        alert('Por favor, insira o email para recuperar a senha.');
+        return;
+      }
+
+      sendPasswordResetEmail(auth, email)
+        .then(() => {
+          alert('O link de recuperação vai ser enviado ao seu email se ele estiver cadastrado corretamente. Para alterações contate o suporte');
+        })
+        .catch((error) => {
+          const errorMessage = error.message;
+          alert('Erro: ' + errorMessage);
+        });
+    });
+  </script>
+</body>
+</html>

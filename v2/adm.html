@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamentos - DM Evolution</title>
+    <style>
+        .em-tratativa {
+            background-color: #e2be4a; /* Azul claro, você pode escolher a cor que preferir */
+            color: black;
+        }
+    </style>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, deleteDoc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAznTyn2JKhPuM2QOJH91r_k3pl89WtiV8",
+            authDomain: "dmevolution-7639a.firebaseapp.com",
+            projectId: "dmevolution-7639a",
+            storageBucket: "dmevolution-7639a.firebasestorage.app",
+            messagingSenderId: "1060243812509",
+            appId: "1:1060243812509:web:f58d7a5f7c52562e946474"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app); // Inicializando o Firebase Auth
+        let orcamentos = [];
+        let ordemAsc = true;
+        
+        // Verifica se o usuário está autenticado
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // Se não estiver autenticado, redireciona para a página de login
+                window.location.href = "login.html";
+            } else {
+                // O usuário está autenticado, carrega os orçamentos
+                carregarOrcamentos();
+                mostrarUsuarioLogado(user);
+            }
+        });
+
+        // Função para exibir o nome do usuário logado e o botão de logout
+        function mostrarUsuarioLogado(user) {
+            const saudacao = document.getElementById("saudacao");
+            const nomeUsuario = user.displayName || user.email; // Exibe o displayName ou email
+            saudacao.innerHTML = `Bem-vindo, ${nomeUsuario}!`;
+
+            const logoutBtn = document.getElementById("logout-btn");
+            logoutBtn.addEventListener("click", () => {
+                signOut(auth).then(() => {
+                    window.location.href = "login.html"; // Redireciona para a página de login após logout
+                }).catch((error) => {
+                    console.error("Erro ao fazer logout: ", error);
+                });
+            });
+        }
+        
+        function carregarOrcamentos() {
+            onSnapshot(collection(db, "formularios"), (snapshot) => {
+                orcamentos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                exibirOrcamentos(orcamentos);
+            });
+        }
+        
+        function exibirOrcamentos(dados) {
+    const tabela = document.getElementById("tabela-orcamentos");
+    tabela.innerHTML = "";
+    
+    dados.forEach(dado => {
+        let detalhesExtras = "";
+        if (dado.tipoConsorcio === "automotivo") {
+            detalhesExtras = `<br><span class='text-gray-400 text-sm'>Modelo: ${dado.modelo || '-'} | Cor: ${dado.cor || '-'}</span>`;
+        } else if (dado.tipoConsorcio === "outros"){
+            detalhesExtras = `<br><span class='text-gray-400 text-sm'>Informações: ${dado.informacoes || '-'}</span>`
+        }
+        
+        // Verifica se o orçamento está em tratativa
+        const tr = document.createElement("tr");
+        tr.classList.add("border-b", "border-gray-700");
+
+        // Se estiver em tratativa, adiciona a classe "em-tratativa"
+        if (dado.emTratativa) {
+            tr.classList.add("em-tratativa");
+        }
+
+        // Monta a linha da tabela
+        tr.innerHTML = `
+            <td class='p-4'>${dado.nome}</td>
+            <td class='p-4'><a href='https://wa.me/55${dado.whatsapp}' target='_blank'>${dado.whatsapp}</a></td>
+            <td class='p-4'>${dado.tipoConsorcio}${detalhesExtras}</td>
+            <td class='p-4'>${dado.valor || '-'}</td>
+            <td class='p-4'>${dado.dataEnvio ? dado.dataEnvio.toDate().toLocaleDateString() : '-'}</td>
+            <td class='p-4'>
+                ${dado.emTratativa ? 
+                    `<button class='bg-green-500 text-white px-4 py-2 rounded concluir-btn' data-id='${dado.id}'>Concluir</button>` 
+                    : 
+                    `<button class='bg-blue-500 text-white px-4 py-2 rounded tratar-btn' data-id='${dado.id}'>Em Tratativa</button>`
+                }
+            </td>
+        `;
+        
+        tabela.appendChild(tr);
+
+        // Adiciona os eventos aos botões
+        document.querySelectorAll(".concluir-btn").forEach(button => {
+            button.addEventListener("click", async (event) => {
+                const id = event.target.dataset.id;
+                concluirOrcamento(id);
+            });
+        });
+
+        document.querySelectorAll(".tratar-btn").forEach(button => {
+            button.addEventListener("click", async (event) => {
+                const id = event.target.dataset.id;
+                emTratativaOrcamento(id);
+            });
+        });
+    });
+}
+
+
+        async function emTratativaOrcamento(id) {
+    const orcamento = orcamentos.find(o => o.id === id);
+    
+    if (orcamento) {
+        // Adiciona o campo "emTratativa" e a data
+        orcamento.emTratativa = true;
+        orcamento.dataTratativa = Timestamp.now(); // Armazena a data e hora do momento em que foi clicado
+
+        // Atualiza o orçamento no Firestore com a nova informação
+        await setDoc(doc(db, "formularios", id), orcamento);
+
+        alert("Orçamento marcado como 'Em Tratativa'.");
+    } else {
+        alert("Orçamento não encontrado.");
+    }
+}
+        
+        async function concluirOrcamento(id) {
+    const orcamento = orcamentos.find(o => o.id === id);
+    const user = auth.currentUser; // Captura o usuário logado
+
+    if (orcamento && user) {
+        orcamento.dataConclusao = Timestamp.now();
+        orcamento.idUsuario = user.email; // Adiciona o ID do usuário ao objeto
+
+        // Envia os dados para a coleção "orcamentosConcluidos"
+        await setDoc(doc(db, "orcamentosConcluidos", id), orcamento);
+
+        // Exclui o orçamento da coleção original
+        await deleteDoc(doc(db, "formularios", id));
+
+        alert("Orçamento concluído e movido para orçamentosConcluidos.");
+    } else {
+        alert("Erro ao concluir orçamento. Usuário não autenticado ou orçamento não encontrado.");
+    }
+}
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            document.getElementById("busca").addEventListener("keyup", buscarOrcamentos);
+            document.querySelectorAll("th[data-sort]").forEach(th => {
+                th.addEventListener("click", () => ordenarPor(th.dataset.sort));
+            });
+        });
+        
+        function buscarOrcamentos() {
+            const filtro = document.getElementById("busca").value.toLowerCase();
+            const resultados = orcamentos.filter(dado => 
+                dado.nome.toLowerCase().includes(filtro) ||
+                dado.whatsapp.includes(filtro) ||
+                dado.tipoConsorcio.toLowerCase().includes(filtro)
+            );
+            exibirOrcamentos(resultados);
+        }
+        
+        function ordenarPor(campo) {
+            ordemAsc = !ordemAsc;
+            orcamentos.sort((a, b) => {
+                if (campo === "dataEnvio") {
+                    const dateA = a[campo] ? a[campo].toDate() : null;
+                    const dateB = b[campo] ? b[campo].toDate() : null;
+                    if (dateA && dateB) {
+                        return ordemAsc ? dateA - dateB : dateB - dateA;
+                    }
+                    return 0;
+                }
+                if (a[campo] < b[campo]) return ordemAsc ? -1 : 1;
+                if (a[campo] > b[campo]) return ordemAsc ? 1 : -1;
+                return 0;
+            });
+            exibirOrcamentos(orcamentos);
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Orçamentos Recebidos</h1>
+        <div class="text-lg" id="saudacao"></div>
+        <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded-lg">Logout</button>
+    </div>
+    
+    <input type="text" id="busca" placeholder="Buscar..." class="w-full p-3 mb-4 rounded-lg bg-gray-700 text-white border-2 border-gray-600 focus:ring-2 focus:ring-yellow-500">
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-gray-800 rounded-lg overflow-hidden">
+            <thead>
+                <tr class="bg-gray-700 text-left">
+                    <th class="p-4 cursor-pointer" data-sort="nome">Nome</th>
+                    <th class="p-4 cursor-pointer" data-sort="whatsapp">WhatsApp</th>
+                    <th class="p-4 cursor-pointer" data-sort="tipoConsorcio">Tipo de Consórcio</th>
+                    <th class="p-4 cursor-pointer" data-sort="valor">Valor</th>
+                    <th class="p-4 cursor-pointer" data-sort="dataEnvio">Data</th>
+                    <th class="p-4">Ações</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-orcamentos">
+                <tr>
+                    <td colspan="6" class="text-center p-4">Carregando...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

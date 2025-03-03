@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orçamentos Concluídos - DM Evolution</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, doc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAznTyn2JKhPuM2QOJH91r_k3pl89WtiV8",
+            authDomain: "dmevolution-7639a.firebaseapp.com",
+            projectId: "dmevolution-7639a",
+            storageBucket: "dmevolution-7639a.firebasestorage.app",
+            messagingSenderId: "1060243812509",
+            appId: "1:1060243812509:web:f58d7a5f7c52562e946474"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+        let orcamentosConcluidos = [];
+        let ordemAsc = true;
+
+        function carregarOrcamentosConcluidos() {
+            onSnapshot(collection(db, "orcamentosConcluidos"), (snapshot) => {
+                orcamentosConcluidos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                exibirOrcamentosConcluidos(orcamentosConcluidos);
+            });
+        }
+        
+        function exibirOrcamentosConcluidos(dados) {
+            const tabela = document.getElementById("tabela-orcamentos-concluidos");
+            tabela.innerHTML = "";
+
+            dados.forEach(dado => {
+                let detalhesExtras = "";
+                if (dado.tipoConsorcio === "automotivo") {
+                    detalhesExtras = `<br><span class='text-gray-400 text-sm'>Modelo: ${dado.modelo || '-'} | Cor: ${dado.cor || '-'}</span>`;
+                }
+
+                const tr = document.createElement("tr");
+                tr.classList.add("border-b", "border-gray-700");
+                const dataEnvio = dado.dataEnvio.toDate();
+                const dataConclusao = dado.dataConclusao.toDate();
+
+                // Cálculo da diferença em dias e horas
+                const diffMs = dataConclusao - dataEnvio; // Diferença em milissegundos
+                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24)); // Diferença em dias
+                const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); // Diferença em horas
+
+                tr.innerHTML = `
+                    <td class='p-4'>${dado.nome}</td>
+                    <td class='p-4'>${dado.whatsapp}</td>
+                    <td class='p-4'>${dado.tipoConsorcio}${detalhesExtras}</td>
+                    <td class='p-4'>${dado.valor || '-'}</td>
+                    <td class='p-4'>${dataEnvio.toLocaleDateString()}</td>
+                    <td class='p-4'>${dataConclusao.toLocaleDateString()}</td>
+                    <td class='p-4'>${dado.idUsuario}</td>
+                    <td class='p-4'>${diffDays} dias e ${diffHours} horas</td>
+                `;
+                tabela.appendChild(tr);
+            });
+        }
+        
+        document.addEventListener("DOMContentLoaded", () => {
+            carregarOrcamentosConcluidos();
+            document.getElementById("busca").addEventListener("keyup", buscarOrcamentosConcluidos);
+            document.querySelectorAll("th[data-sort]").forEach(th => {
+                th.addEventListener("click", () => ordenarPor(th.dataset.sort));
+            });
+        });
+        
+        function buscarOrcamentosConcluidos() {
+            const filtro = document.getElementById("busca").value.toLowerCase();
+            const resultados = orcamentosConcluidos.filter(dado => 
+                dado.nome.toLowerCase().includes(filtro) ||
+                dado.whatsapp.includes(filtro) ||
+                dado.tipoConsorcio.toLowerCase().includes(filtro) ||
+                dado.emailUsuario.toLowerCase().includes(filtro)
+            );
+            exibirOrcamentosConcluidos(resultados);
+        }
+        
+        function ordenarPor(campo) {
+            ordemAsc = !ordemAsc;
+            orcamentosConcluidos.sort((a, b) => {
+                if (a[campo] < b[campo]) return ordemAsc ? -1 : 1;
+                if (a[campo] > b[campo]) return ordemAsc ? 1 : -1;
+                return 0;
+            });
+            exibirOrcamentosConcluidos(orcamentosConcluidos);
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    <h1 class="text-3xl font-bold mb-6 text-center">Orçamentos Concluídos</h1>
+
+    <input type="text" id="busca" placeholder="Buscar..." class="w-full p-3 mb-4 rounded-lg bg-gray-700 text-white border-2 border-gray-600 focus:ring-2 focus:ring-yellow-500">
+    
+    <div class="overflow-x-auto">
+        <table class="min-w-full bg-gray-800 rounded-lg overflow-hidden">
+            <thead>
+                <tr class="bg-gray-700 text-left">
+                    <th class="p-4 cursor-pointer" data-sort="nome">Nome</th>
+                    <th class="p-4 cursor-pointer" data-sort="whatsapp">WhatsApp</th>
+                    <th class="p-4 cursor-pointer" data-sort="tipoConsorcio">Tipo de Consórcio</th>
+                    <th class="p-4 cursor-pointer" data-sort="valor">Valor</th>
+                    <th class="p-4 cursor-pointer" data-sort="dataEnvio">Data de Envio</th>
+                    <th class="p-4 cursor-pointer" data-sort="dataConclusao">Data de Conclusão</th>
+                    <th class="p-4 cursor-pointer" data-sort="emailUsuario">Email do Usuário</th>
+                    <th class="p-4 cursor-pointer" data-sort="diferencaDias">Diferença de Dias e Horas</th>
+                </tr>
+            </thead>
+            <tbody id="tabela-orcamentos-concluidos">
+                <tr>
+                    <td colspan="8" class="text-center p-4">Carregando...</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

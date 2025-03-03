@@ -457,5 +457,83 @@
     });
 </script>
 
+<script type="module">
+    // Importa o Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+  
+    // Configuração do Firebase (substitua pelos seus dados)
+    const firebaseConfig = {
+        apiKey: "AIzaSyAznTyn2JKhPuM2QOJH91r_k3pl89WtiV8",
+  authDomain: "dmevolution-7639a.firebaseapp.com",
+  projectId: "dmevolution-7639a",
+  storageBucket: "dmevolution-7639a.firebasestorage.app",
+  messagingSenderId: "1060243812509",
+  appId: "1:1060243812509:web:f58d7a5f7c52562e946474"
+    };
+  
+    // Inicializa o Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+  
+    // Função para enviar dados para o Firestore
+    async function enviarFormulario(event) {
+      event.preventDefault(); // Impede o reload da página
+  
+      // Captura os valores do formulário
+      const nome = document.getElementById("nome").value;
+      const whatsapp = document.getElementById("whatsapp").value;
+      const tipoConsorcio = document.getElementById("tipoConsorcio").value;
+  
+      let dadosExtras = {};
+      if (tipoConsorcio === "residencial") {
+        dadosExtras = {
+          valor: document.getElementById("valorResidencial").value,
+          tipoImovel: document.getElementById("tipoResidencial").value,
+        };
+      } else if (tipoConsorcio === "automotivo") {
+        dadosExtras = {
+          modelo: document.getElementById("modeloAutomotivo").value,
+          cor: document.getElementById("corAutomotivo").value,
+          valor: document.getElementById("valorAutomotivo").value,
+        };
+      }else if (tipoConsorcio === "pesados") {
+        dadosExtras = {
+          modelo: document.getElementById("modeloAutomotivo").value,
+          cor: document.getElementById("corAutomotivo").value,
+          valor: document.getElementById("valorAutomotivo").value,
+        };
+      } else if (tipoConsorcio === "outros") {
+        dadosExtras = {
+          informacoes: document.getElementById("informacoesOutros").value,
+          valor: document.getElementById("valorOutros").value,
+        };
+      }
+  
+      // Monta o objeto para salvar no Firestore
+      const dadosFormulario = {
+        nome,
+        whatsapp,
+        tipoConsorcio,
+        ...dadosExtras,
+        dataEnvio: new Date()
+      };
+  
+      try {
+        await addDoc(collection(db, "formularios"), dadosFormulario);
+        alert("Solicitação enviada com sucesso!");
+      } catch (error) {
+        console.error("Erro ao enviar formulário:", error);
+        alert("Erro ao enviar a solicitação.");
+      }
+    }
+  
+    // Adiciona evento ao formulário
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelector("form").addEventListener("submit", enviarFormulario);
+    });
+  </script>
+  
+
 </body>
 </html>
