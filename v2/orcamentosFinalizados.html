@@ -7,8 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getAuth } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
         const firebaseConfig = {
             apiKey: "AIzaSyAznTyn2JKhPuM2QOJH91r_k3pl89WtiV8",
@@ -18,10 +18,27 @@
             messagingSenderId: "1060243812509",
             appId: "1:1060243812509:web:f58d7a5f7c52562e946474"
         };
-        
+
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+
+        // Verificação de autenticação
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "login.html"; // Redireciona se não estiver autenticado
+            } else {
+                mostrarUsuarioLogado(user);
+            }
+        });
+
+        function mostrarUsuarioLogado(user) {
+            const saudacao = document.getElementById("saudacao");
+            const nomeUsuario = user.displayName || user.email; // Exibe o displayName ou email
+            saudacao.innerHTML = `Bem-vindo, ${nomeUsuario}!`;
+
+        }
+
         let orcamentosConcluidos = [];
         let ordemAsc = true;
 
@@ -44,13 +61,14 @@
 
                 const tr = document.createElement("tr");
                 tr.classList.add("border-b", "border-gray-700");
+
                 const dataEnvio = dado.dataEnvio.toDate();
                 const dataConclusao = dado.dataConclusao.toDate();
 
                 // Cálculo da diferença em dias e horas
-                const diffMs = dataConclusao - dataEnvio; // Diferença em milissegundos
-                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24)); // Diferença em dias
-                const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)); // Diferença em horas
+                const diffMs = dataConclusao - dataEnvio;
+                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
                 tr.innerHTML = `
                     <td class='p-4'>${dado.nome}</td>
@@ -65,15 +83,22 @@
                 tabela.appendChild(tr);
             });
         }
-        
+
         document.addEventListener("DOMContentLoaded", () => {
             carregarOrcamentosConcluidos();
             document.getElementById("busca").addEventListener("keyup", buscarOrcamentosConcluidos);
             document.querySelectorAll("th[data-sort]").forEach(th => {
                 th.addEventListener("click", () => ordenarPor(th.dataset.sort));
             });
+            document.getElementById("logout-btn").addEventListener("click", () => {
+                signOut(auth).then(() => {
+                    window.location.href = "login.html"; // Redireciona após logout
+                }).catch(error => {
+                    console.error("Erro ao sair:", error);
+                });
+            });
         });
-        
+
         function buscarOrcamentosConcluidos() {
             const filtro = document.getElementById("busca").value.toLowerCase();
             const resultados = orcamentosConcluidos.filter(dado => 
@@ -84,7 +109,7 @@
             );
             exibirOrcamentosConcluidos(resultados);
         }
-        
+
         function ordenarPor(campo) {
             ordemAsc = !ordemAsc;
             orcamentosConcluidos.sort((a, b) => {
@@ -94,10 +119,18 @@
             });
             exibirOrcamentosConcluidos(orcamentosConcluidos);
         }
+        document.getElementById('orcamentos-btn').addEventListener('click', function(){
+            window.location.href = 'adm.html'
+        })
     </script>
 </head>
 <body class="bg-gray-900 text-white p-8">
-    <h1 class="text-3xl font-bold mb-6 text-center">Orçamentos Concluídos</h1>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Orçamentos Concluídos</h1>
+        <div class="text-lg" id="saudacao"></div>
+        <button id="orcamentos-btn" class="bg-yellow-500 px-4 py-2 rounded-lg hover:bg-yellow-600">Orçamentos não finalizados</button>
+        <button id="logout-btn" class="bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700">Logout</button>
+    </div>
 
     <input type="text" id="busca" placeholder="Buscar..." class="w-full p-3 mb-4 rounded-lg bg-gray-700 text-white border-2 border-gray-600 focus:ring-2 focus:ring-yellow-500">
     

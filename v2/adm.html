@@ -194,12 +194,17 @@
             });
             exibirOrcamentos(orcamentos);
         }
+
+        document.getElementById('concluidos-btn').addEventListener('click', function(){
+            window.location.href = 'orcamentosFinalizados.html';
+        })
     </script>
 </head>
 <body class="bg-gray-900 text-white p-8">
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">Orçamentos Recebidos</h1>
         <div class="text-lg" id="saudacao"></div>
+        <button id="concluidos-btn" class="bg-green-500 text-white px-4 py-2 rounded-lg">Orçamentos Concluídos</button>
         <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded-lg">Logout</button>
     </div>
     
