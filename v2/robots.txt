@@ -1,0 +1,8 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /login/
+Disallow: /consorciosFinalizados/
+
+Allow: /
+
+Sitemap: https://www.dmevolution.com.br/sitemap.xml
