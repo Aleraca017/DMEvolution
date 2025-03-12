@@ -113,14 +113,14 @@
         <div class="container mx-auto flex justify-between items-center">
             <!-- Logo -->
             <a href="#" class="text-xl font-bold">
-                <img src="images/icone.png" alt="Logo" class="h-12">
+                <img src="images/webp/icone.webp" alt="Logo" class="h-12">
             </a>
             
             <!-- Menu de Navegação -->
             <nav class="hidden md:flex space-x-8 text-lg">
-                <a href="#servicos" class="hover:text-yellow-500 transition-all transform hover:scale-110">Serviços</a>
-                <a href="#quemSomos" class="hover:text-yellow-500 transition-all transform hover:scale-110">Quem Somos</a>
-                <a href="#contato" class="hover:text-yellow-500 transition-all transform hover:scale-110">Contato</a>
+                <button data-scroll="servicos">Serviços</button>
+                <button data-scroll="quemSomos">Quem Somos</button>
+                <button data-scroll="contato">Contato</button>
             </nav>
             
             <!-- Ícones sociais (opcional) -->
@@ -165,7 +165,7 @@
     <section class="relative w-full h-screen text-white flex items-center justify-center overflow-hidden" id="destaque">
         <!-- Fundo fixo -->
         <div class="fixed top-0 left-0 w-full h-screen bg-cover bg-center bg-no-repeat" 
-            style="background-image: url('images/residencial-familia.jpg'); filter: brightness(60%); z-index: -1;">
+            style="background-image: url('images/webp/residencial-familia.webp'); filter: brightness(60%); z-index: -1;" >
         </div>
     
         <!-- Conteúdo sobre a imagem -->
@@ -198,55 +198,43 @@
             <h2 class="text-5xl font-semibold text-yellow-500 mb-8">Nossos Serviços</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer">
-                    <img src="images/automotivo.jpg" alt="Consórcios Automotivos" class="rounded-lg mb-4 w-full h-48 object-cover">
+                    <img src="images/webp/automotivo.webp" alt="Consórcios Automotivos" class="rounded-lg mb-4 w-full h-48 object-cover" loading="lazy">
                     <h3 class="text-3xl font-semibold mb-2">Consórcios Automotivos</h3>
                     <p>Parcelas flexíveis para adquirir seu carro com segurança.</p>
-                    <div class="more-info mt-4 text-left text-sm text-gray-300 max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
-                        <p>Detalhes adicionais sobre consórcios automotivos, com explicações sobre taxas, prazos, benefícios exclusivos, entre outros.</p>
-                        <ul>
-                            <li>- Opções de financiamento com condições especiais</li>
-                            <li>- Assessoria para escolher o melhor veículo</li>
-                            <li>- Planos personalizáveis para seu orçamento</li>
-                        </ul>
-                    </div>
                 </div>
+
                 <div class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer">
-                    <img src="images/residencial.jpg" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover">
+                    <img src="images/webp/residencial.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover" loading="lazy">
                     <h3 class="text-3xl font-semibold mb-2">Consórcios Residenciais</h3>
                     <p>Realize o sonho da casa própria com um consórcio acessível.</p>
-                    <div class="more-info mt-4 text-left text-sm text-gray-300 max-h-0 overflow-hidden transition-all duration-300 ease-in-out">
-                        <p>Detalhes adicionais sobre consórcios residenciais, como opções de imóveis, taxas de financiamento, e muito mais.</p>
-                        <ul>
-                            <li>- Planos com prazos flexíveis</li>
-                            <li>- Financiamento de imóveis novos e usados</li>
-                            <li>- Consultoria para escolher o melhor imóvel</li>
-                        </ul>
-                    </div>
+                </div>
+
+                <div class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer">
+                    <img src="images/webp/carta-contemplada.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover" loading="lazy">
+                    <h3 class="text-3xl font-semibold mb-2">Cartas Contempladas</h3>
+                    <p>As cartas contempladas são cotas de consórcio que já foram sorteadas ou contempladas por lance, o que significa que o comprador tem o direito de utilizar o crédito imediatamente, sem precisar esperar ser sorteado novamente.</p>
+                </div>
+
+                <div class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer">
+                    <img src="images/webp/capital-giro.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover" loading="lazy">
+                    <h3 class="text-3xl font-semibold mb-2">Capital de Giro</h3>
+                    <p>O Capital de Giro é o dinheiro necessário para cobrir as despesas operacionais do dia a dia de uma empresa.</p>
+                </div>
+
+                <div class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer">
+                    <img src="images/webp/home-equity.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover" loading="lazy">
+                    <h3 class="text-3xl font-semibold mb-2">Home Equity</h3>
+                    <p>O Home Equity é um tipo de empréstimo onde você usa um imóvel quitado como garantia para obter crédito. Também é conhecido como “Empréstimo com Garantia de Imóvel”. Esse tipo de crédito geralmente oferece taxas de juros mais baixas e prazos mais longos de pagamento, pois o banco ou instituição financeira tem a segurança do imóvel como garantia.</p>
+                </div>
+
+                <div class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer">
+                    <img src="images/webp/financiamento.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover" loading="lazy">
+                    <h3 class="text-3xl font-semibold mb-2">Financiamento</h3>
+                    <p>O Financiamento é uma modalidade de crédito onde fornecemos o dinheiro necessário para a compra de um bem específico (como imóveis, veículos, máquinas, etc.) e o comprador devolve o valor emprestado em parcelas mensais acrescidas de juros e taxas.</p>
                 </div>
             </div>
         </div>
     </section>
-    
-    <script>
-        // Seleciona todas as caixas de serviço
-        const serviceBoxes = document.querySelectorAll('.service-box');
-        
-        // Adiciona um evento de clique em cada uma
-        serviceBoxes.forEach(box => {
-            box.addEventListener('click', () => {
-                // Fecha todas as caixas
-                serviceBoxes.forEach(otherBox => {
-                    if (otherBox !== box) {
-                        otherBox.querySelector('.more-info').classList.remove('open');
-                    }
-                });
-                
-                // Alterna a visibilidade do conteúdo adicional da caixa clicada
-                const moreInfo = box.querySelector('.more-info');
-                moreInfo.classList.toggle('open');
-            });
-        });
-    </script>
 
     
     <!-- Conteúdo sobre a imagem -->
@@ -404,10 +392,10 @@
                     <h3 class="text-lg font-semibold text-yellow-500 mb-2">Empresas Parceiras</h3>
                     <div class="flex justify-center sm:justify-start gap-4">
                         <a href="https://www.vw.com.br/pt.html" target="_blank">
-                            <img src="images/parceiros/volks.png" alt="Empresa Parceira 2" class="h-12">
+                            <img src="images/webp/parceiros/volks.webp" alt="Empresa Parceira 2" class="h-12">
                         </a>
                         <a href="https://www.embracon.com.br/" target="_blank">
-                            <img src="images/parceiros/Logo_Consórcio_Nacional_Embracon.jpg" alt="Empresa Parceira 3" class="h-12">
+                            <img src="images/webp/parceiros/Logo_Consórcio_Nacional_Embracon.webp" alt="Empresa Parceira 3" class="h-12">
                         </a>
                     </div>
                 </div>
@@ -562,6 +550,18 @@
     });
   </script>
   
+  <script>
+    document.querySelectorAll('[data-scroll]').forEach(button => {
+        button.addEventListener('click', (e) => {
+            const targetId = e.target.getAttribute('data-scroll');
+            const targetElement = document.getElementById(targetId);
+
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
