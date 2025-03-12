@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -49,6 +50,7 @@
             background-color: rgba(0, 0, 0, 0.132);
             backdrop-filter: blur(15px);
         }
+
 
 .hamburger {
   cursor: pointer;
@@ -198,37 +200,37 @@
             <h2 class="text-5xl font-semibold text-yellow-500 mb-8">Nossos Serviços</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer">
-                    <img src="images/webp/automotivo.webp" alt="Consórcios Automotivos" class="rounded-lg mb-4 w-full h-48 object-cover" loading="lazy">
+                    <img src="images/webp/automotivo.webp" alt="Consórcios Automotivos" class="rounded-lg mb-4 w-full h-48 object-cover"   >
                     <h3 class="text-3xl font-semibold mb-2">Consórcios Automotivos</h3>
                     <p>Parcelas flexíveis para adquirir seu carro com segurança.</p>
                 </div>
 
                 <div class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer">
-                    <img src="images/webp/residencial.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover" loading="lazy">
+                    <img src="images/webp/residencial.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover"   >
                     <h3 class="text-3xl font-semibold mb-2">Consórcios Residenciais</h3>
                     <p>Realize o sonho da casa própria com um consórcio acessível.</p>
                 </div>
 
                 <div class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer">
-                    <img src="images/webp/carta-contemplada.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover" loading="lazy">
+                    <img src="images/webp/carta-contemplada.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover"   >
                     <h3 class="text-3xl font-semibold mb-2">Cartas Contempladas</h3>
                     <p>As cartas contempladas são cotas de consórcio que já foram sorteadas ou contempladas por lance, o que significa que o comprador tem o direito de utilizar o crédito imediatamente, sem precisar esperar ser sorteado novamente.</p>
                 </div>
 
                 <div class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer">
-                    <img src="images/webp/capital-giro.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover" loading="lazy">
+                    <img src="images/webp/capital-giro.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover"   >
                     <h3 class="text-3xl font-semibold mb-2">Capital de Giro</h3>
                     <p>O Capital de Giro é o dinheiro necessário para cobrir as despesas operacionais do dia a dia de uma empresa.</p>
                 </div>
 
                 <div class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer">
-                    <img src="images/webp/home-equity.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover" loading="lazy">
+                    <img src="images/webp/home-equity.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover"   >
                     <h3 class="text-3xl font-semibold mb-2">Home Equity</h3>
                     <p>O Home Equity é um tipo de empréstimo onde você usa um imóvel quitado como garantia para obter crédito. Também é conhecido como “Empréstimo com Garantia de Imóvel”. Esse tipo de crédito geralmente oferece taxas de juros mais baixas e prazos mais longos de pagamento, pois o banco ou instituição financeira tem a segurança do imóvel como garantia.</p>
                 </div>
 
                 <div class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer">
-                    <img src="images/webp/financiamento.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover" loading="lazy">
+                    <img src="images/webp/financiamento.webp" alt="Consórcios Residenciais" class="rounded-lg mb-4 w-full h-48 object-cover"   >
                     <h3 class="text-3xl font-semibold mb-2">Financiamento</h3>
                     <p>O Financiamento é uma modalidade de crédito onde fornecemos o dinheiro necessário para a compra de um bem específico (como imóveis, veículos, máquinas, etc.) e o comprador devolve o valor emprestado em parcelas mensais acrescidas de juros e taxas.</p>
                 </div>
@@ -490,64 +492,66 @@
   
     // Inicializa o Firebase
     const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+    let db; // Definir a variável de forma global
+
+document.addEventListener("DOMContentLoaded", function () {
+  if (!db) { // Verificar se já foi inicializado
+    // Inicializar o Firebase apenas uma vez
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+  }
+
+  // Adiciona o evento ao formulário
+  document.querySelector("form").addEventListener("submit", enviarFormulario);
+});
   
     // Função para enviar dados para o Firestore
     async function enviarFormulario(event) {
-      event.preventDefault(); // Impede o reload da página
+  event.preventDefault(); // Impede o reload da página
+
+  const formData = new FormData(event.target); // Captura todos os dados do formulário de uma vez
+  const nome = formData.get("nome");
+  const whatsapp = formData.get("whatsapp");
+  const tipoConsorcio = formData.get("tipoConsorcio");
+
+  let dadosExtras = {};
+
+  if (tipoConsorcio === "residencial") {
+    dadosExtras = {
+      valor: formData.get("valorResidencial"),
+      tipoImovel: formData.get("tipoResidencial"),
+    };
+  } else if (tipoConsorcio === "automotivo" || tipoConsorcio === "pesados") {
+    dadosExtras = {
+      modelo: formData.get("modeloAutomotivo"),
+      cor: formData.get("corAutomotivo"),
+      valor: formData.get("valorAutomotivo"),
+    };
+  } else if (tipoConsorcio === "outros") {
+    dadosExtras = {
+      informacoes: formData.get("informacoesOutros"),
+      valor: formData.get("valorOutros"),
+    };
+  }
+
+  // Monta o objeto para salvar no Firestore
+  const dadosFormulario = {
+    nome,
+    whatsapp,
+    tipoConsorcio,
+    ...dadosExtras,
+    dataEnvio: new Date()
+  };
+
+  try {
+    await addDoc(collection(db, "formularios"), dadosFormulario);
+    alert("Solicitação enviada com sucesso!");
+  } catch (error) {
+    console.error("Erro ao enviar formulário:", error);
+    alert("Erro ao enviar a solicitação.");
+  }
+}
   
-      // Captura os valores do formulário
-      const nome = document.getElementById("nome").value;
-      const whatsapp = document.getElementById("whatsapp").value;
-      const tipoConsorcio = document.getElementById("tipoConsorcio").value;
-  
-      let dadosExtras = {};
-      if (tipoConsorcio === "residencial") {
-        dadosExtras = {
-          valor: document.getElementById("valorResidencial").value,
-          tipoImovel: document.getElementById("tipoResidencial").value,
-        };
-      } else if (tipoConsorcio === "automotivo") {
-        dadosExtras = {
-          modelo: document.getElementById("modeloAutomotivo").value,
-          cor: document.getElementById("corAutomotivo").value,
-          valor: document.getElementById("valorAutomotivo").value,
-        };
-      }else if (tipoConsorcio === "pesados") {
-        dadosExtras = {
-          modelo: document.getElementById("modeloAutomotivo").value,
-          cor: document.getElementById("corAutomotivo").value,
-          valor: document.getElementById("valorAutomotivo").value,
-        };
-      } else if (tipoConsorcio === "outros") {
-        dadosExtras = {
-          informacoes: document.getElementById("informacoesOutros").value,
-          valor: document.getElementById("valorOutros").value,
-        };
-      }
-  
-      // Monta o objeto para salvar no Firestore
-      const dadosFormulario = {
-        nome,
-        whatsapp,
-        tipoConsorcio,
-        ...dadosExtras,
-        dataEnvio: new Date()
-      };
-  
-      try {
-        await addDoc(collection(db, "formularios"), dadosFormulario);
-        alert("Solicitação enviada com sucesso!");
-      } catch (error) {
-        console.error("Erro ao enviar formulário:", error);
-        alert("Erro ao enviar a solicitação.");
-      }
-    }
-  
-    // Adiciona evento ao formulário
-    document.addEventListener("DOMContentLoaded", function () {
-      document.querySelector("form").addEventListener("submit", enviarFormulario);
-    });
   </script>
   
   <script>
