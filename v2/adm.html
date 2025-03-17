@@ -67,98 +67,97 @@
         }
         
         function exibirOrcamentos(dados) {
-    const tabela = document.getElementById("tabela-orcamentos");
-    tabela.innerHTML = "";
-    
-    dados.forEach(dado => {
-        let detalhesExtras = "";
-        if (dado.tipoConsorcio === "automotivo") {
-            detalhesExtras = `<br><span class='text-gray-400 text-sm'>Modelo: ${dado.modelo || '-'} | Cor: ${dado.cor || '-'}</span>`;
-        } else if (dado.tipoConsorcio === "outros"){
-            detalhesExtras = `<br><span class='text-gray-400 text-sm'>Informações: ${dado.informacoes || '-'}</span>`
-        }
-        
-        // Verifica se o orçamento está em tratativa
-        const tr = document.createElement("tr");
-        tr.classList.add("border-b", "border-gray-700");
-
-        // Se estiver em tratativa, adiciona a classe "em-tratativa"
-        if (dado.emTratativa) {
-            tr.classList.add("em-tratativa");
-        }
-
-        // Monta a linha da tabela
-        tr.innerHTML = `
-            <td class='p-4'>${dado.nome}</td>
-            <td class='p-4'><a href='https://wa.me/55${dado.whatsapp}' target='_blank'>${dado.whatsapp}</a></td>
-            <td class='p-4'>${dado.tipoConsorcio}${detalhesExtras}</td>
-            <td class='p-4'>${dado.valor || '-'}</td>
-            <td class='p-4'>${dado.dataEnvio ? dado.dataEnvio.toDate().toLocaleDateString() : '-'}</td>
-            <td class='p-4'>
-                ${dado.emTratativa ? 
-                    `<button class='bg-green-500 text-white px-4 py-2 rounded concluir-btn' data-id='${dado.id}'>Concluir</button>` 
-                    : 
-                    `<button class='bg-blue-500 text-white px-4 py-2 rounded tratar-btn' data-id='${dado.id}'>Em Tratativa</button>`
+            const tabela = document.getElementById("tabela-orcamentos");
+            tabela.innerHTML = "";
+            
+            dados.forEach(dado => {
+                let detalhesExtras = "";
+                if (dado.tipoConsorcio === "automotivo") {
+                    detalhesExtras = `<br><span class='text-gray-400 text-sm'>Modelo: ${dado.modelo || '-'} | Cor: ${dado.cor || '-'}</span>`;
+                } else if (dado.tipoConsorcio === "outros"){
+                    detalhesExtras = `<br><span class='text-gray-400 text-sm'>Informações: ${dado.informacoes || '-'}</span>`;
                 }
-            </td>
-        `;
-        
-        tabela.appendChild(tr);
+                
+                // Verifica se o orçamento está em tratativa
+                const tr = document.createElement("tr");
+                tr.classList.add("border-b", "border-gray-700");
 
-        // Adiciona os eventos aos botões
-        document.querySelectorAll(".concluir-btn").forEach(button => {
-            button.addEventListener("click", async (event) => {
-                const id = event.target.dataset.id;
-                concluirOrcamento(id);
+                // Se estiver em tratativa, adiciona a classe "em-tratativa"
+                if (dado.emTratativa) {
+                    tr.classList.add("em-tratativa");
+                }
+
+                // Monta a linha da tabela
+                tr.innerHTML = `
+                    <td class='p-4'>${dado.nome}</td>
+                    <td class='p-4'><a href='https://wa.me/55${dado.whatsapp}' target='_blank'>${dado.whatsapp}</a></td>
+                    <td class='p-4'>${dado.tipoConsorcio}${detalhesExtras}</td>
+                    <td class='p-4'>${dado.valor || '-'}</td>
+                    <td class='p-4'>${dado.dataEnvio ? dado.dataEnvio.toDate().toLocaleDateString() : '-'}</td>
+                    <td class='p-4'>
+                        ${dado.emTratativa ? 
+                            `<button class='bg-green-500 text-white px-4 py-2 rounded concluir-btn' data-id='${dado.id}'>Concluir</button>` 
+                            : 
+                            `<button class='bg-blue-500 text-white px-4 py-2 rounded tratar-btn' data-id='${dado.id}'>Em Tratativa</button>`
+                        }
+                    </td>
+                `;
+                
+                tabela.appendChild(tr);
+
+                // Adiciona os eventos aos botões
+                document.querySelectorAll(".concluir-btn").forEach(button => {
+                    button.addEventListener("click", async (event) => {
+                        const id = event.target.dataset.id;
+                        concluirOrcamento(id);
+                    });
+                });
+
+                document.querySelectorAll(".tratar-btn").forEach(button => {
+                    button.addEventListener("click", async (event) => {
+                        const id = event.target.dataset.id;
+                        emTratativaOrcamento(id);
+                    });
+                });
             });
-        });
-
-        document.querySelectorAll(".tratar-btn").forEach(button => {
-            button.addEventListener("click", async (event) => {
-                const id = event.target.dataset.id;
-                emTratativaOrcamento(id);
-            });
-        });
-    });
-}
-
+        }
 
         async function emTratativaOrcamento(id) {
-    const orcamento = orcamentos.find(o => o.id === id);
-    
-    if (orcamento) {
-        // Adiciona o campo "emTratativa" e a data
-        orcamento.emTratativa = true;
-        orcamento.dataTratativa = Timestamp.now(); // Armazena a data e hora do momento em que foi clicado
+            const orcamento = orcamentos.find(o => o.id === id);
+            
+            if (orcamento) {
+                // Adiciona o campo "emTratativa" e a data
+                orcamento.emTratativa = true;
+                orcamento.dataTratativa = Timestamp.now(); // Armazena a data e hora do momento em que foi clicado
 
-        // Atualiza o orçamento no Firestore com a nova informação
-        await setDoc(doc(db, "formularios", id), orcamento);
+                // Atualiza o orçamento no Firestore com a nova informação
+                await setDoc(doc(db, "formularios", id), orcamento);
 
-        alert("Orçamento marcado como 'Em Tratativa'.");
-    } else {
-        alert("Orçamento não encontrado.");
-    }
-}
+                alert("Orçamento marcado como 'Em Tratativa'.");
+            } else {
+                alert("Orçamento não encontrado.");
+            }
+        }
         
         async function concluirOrcamento(id) {
-    const orcamento = orcamentos.find(o => o.id === id);
-    const user = auth.currentUser; // Captura o usuário logado
+            const orcamento = orcamentos.find(o => o.id === id);
+            const user = auth.currentUser; // Captura o usuário logado
 
-    if (orcamento && user) {
-        orcamento.dataConclusao = Timestamp.now();
-        orcamento.idUsuario = user.email; // Adiciona o ID do usuário ao objeto
+            if (orcamento && user) {
+                orcamento.dataConclusao = Timestamp.now();
+                orcamento.idUsuario = user.email; // Adiciona o ID do usuário ao objeto
 
-        // Envia os dados para a coleção "orcamentosConcluidos"
-        await setDoc(doc(db, "orcamentosConcluidos", id), orcamento);
+                // Envia os dados para a coleção "orcamentosConcluidos"
+                await setDoc(doc(db, "orcamentosConcluidos", id), orcamento);
 
-        // Exclui o orçamento da coleção original
-        await deleteDoc(doc(db, "formularios", id));
+                // Exclui o orçamento da coleção original
+                await deleteDoc(doc(db, "formularios", id));
 
-        alert("Orçamento concluído e movido para orçamentosConcluidos.");
-    } else {
-        alert("Erro ao concluir orçamento. Usuário não autenticado ou orçamento não encontrado.");
-    }
-}
+                alert("Orçamento concluído e movido para orçamentosConcluidos.");
+            } else {
+                alert("Erro ao concluir orçamento. Usuário não autenticado ou orçamento não encontrado.");
+            }
+        }
         
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById("busca").addEventListener("keyup", buscarOrcamentos);
