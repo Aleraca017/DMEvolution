@@ -9,6 +9,9 @@
             background-color: #e2be4a; /* Azul claro, você pode escolher a cor que preferir */
             color: black;
         }
+        .em-tratativa span{
+            color: oklch(0.421 0.095 57.708);
+        }
     </style>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
@@ -85,9 +88,9 @@
             dados.forEach(dado => {
                 let detalhesExtras = "";
                 if (dado.tipoConsorcio === "Consórcio Automotivo") {
-                    detalhesExtras = `<br><span class='text-gray-400 text-sm'><strong>Modelo:</strong> ${dado.modelo || '-'} | Cor: ${dado.cor || '-'}</span>`;
+                    detalhesExtras = `<br><span class='text-gray-400 text-sm'><strong>Modelo:</strong> ${dado.modelo || '-'} | <strong>Cor:</strong> ${dado.cor || '-'}</span>`;
                 } else if (dado.tipoConsorcio === "automotivo"){
-                    detalhesExtras = `<br><span class='text-gray-400 text-sm'><strong>Modelo:</strong> ${dado.modelo || '-'} | Cor: ${dado.cor || '-'}</span>`;
+                    detalhesExtras = `<br><span class='text-gray-400 text-sm'><strong>Modelo:</strong> ${dado.modelo || '-'} | <strong>Cor:</strong> ${dado.cor || '-'}</span>`;
                 } else if (dado.tipoConsorcio === "Consórcio Residencial"){
                     detalhesExtras = `<br><span class='text-gray-400 text-sm'><strong>Tipo do imóvel:</strong> ${dado.tipoImovel || '-'}</span>`;
                 } else if (dado.tipoConsorcio === "Carta Contemplada"){
@@ -116,11 +119,11 @@
                     <td class='p-4'>${dado.dataEnvio ? dado.dataEnvio.toDate().toLocaleDateString() : '-'}</td>
                     <td class='p-4'>
                         ${dado.emTratativa ? 
-                            `<button class='bg-green-500 w-[120px] text-white px-4 py-2 rounded concluir-btn' data-id='${dado.id}'>Concluir</button>
-                            <button class='cancelar-tratativa-btn bg-red-500 text-white px-4 py-2 rounded' data-id='${dado.id}'>Cancelar Tratativa</button>
+                            `<button class='bg-green-500 w-[120px] hover:bg-green-700 text-white px-4 py-2 rounded concluir-btn' data-id='${dado.id}'>Concluir</button>
+                            <button class='cancelar-tratativa-btn bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded' data-id='${dado.id}'>Cancelar Tratativa</button>
                             ` 
                             : 
-                            `<button class='bg-blue-500 w-[120px] text-white px-4 py-2 rounded tratar-btn' data-id='${dado.id}'>Em Tratativa</button>`
+                            `<button class='bg-blue-500 w-[120px] hover:bg-blue-700 text-white px-4 py-2 rounded tratar-btn' data-id='${dado.id}'>Em Tratativa</button>`
                         }
                     </td>
                 `;
@@ -249,8 +252,10 @@ if (!document.getElementById("tabela-orcamentos").hasAttribute("data-listeners")
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold">Orçamentos Recebidos</h1>
         <div class="text-lg" id="saudacao"></div>
-        <button id="concluidos-btn" class="bg-green-500 text-white px-4 py-2 rounded-lg">Orçamentos Concluídos</button>
-        <button id="logout-btn" class="bg-red-500 text-white px-4 py-2 rounded-lg">Logout</button>
+        <div>
+            <button id="concluidos-btn" class="bg-green-500 hover:bg-green-700 text-white px-4 py-2 rounded-lg">Orçamentos Concluídos</button>
+            <button id="logout-btn" class="bg-red-500 hover:bg-red-700 text-white px-4 py-2 rounded-lg">Logout</button>
+        </div>
     </div>
     
     <input type="text" id="busca" placeholder="Buscar..." class="w-full p-3 mb-4 rounded-lg bg-gray-700 text-white border-2 border-gray-600 focus:ring-2 focus:ring-yellow-500">

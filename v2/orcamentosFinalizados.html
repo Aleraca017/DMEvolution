@@ -95,7 +95,7 @@
                     <td class='p-4 text-sm md:text-base'>${dado.tipoConsorcio}</td>
                     <td class='p-4 text-sm md:text-base'>${dado.dataEnvio ? dado.dataEnvio.toDate().toLocaleDateString() : '-'}</td>
                     <td class='p-4 text-sm md:text-base'>
-                        <button class='info-btn bg-blue-500 hover:bg-transparent border-blue-500 border w-[120px] text-white px-4 py-2 rounded' data-info='${JSON.stringify(dado)}'>ℹ️</button>
+                        <button class='info-btn bg-blue-500 hover:bg-transparent border-blue-500 border w-full text-white px-4 py-2 rounded' data-info='${JSON.stringify(dado)}'>Informações</button>
                     </td>
                 `;
 
@@ -111,19 +111,32 @@
         }
 
         function formatarTimestamp(timestamp) {
-            if (timestamp && timestamp.seconds !== undefined && timestamp.nanoseconds !== undefined) {
-                const data = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000);
-                return data.toLocaleDateString('pt-BR');
-            }
-            return '-';
-        }
+    // Verificar se o valor é um Timestamp do Firestore
+    if (timestamp && timestamp.seconds !== undefined && timestamp.nanoseconds !== undefined) {
+        // Criar o objeto Date a partir dos campos seconds e nanoseconds
+        const data = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000); // Conversão para milissegundos
+        const options = {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false,
+            timeZone: 'America/Sao_Paulo', // UTC-3
+        };
+        return data.toLocaleString('pt-BR', options).replace(',', ''); // Formato DD/MM/YYYY HH:MM
+    } else {
+        console.error('Timestamp inválido:', timestamp);
+        return '-';
+    }
+}
 
         function exibirInformacoes(dado) {
             const infoBox = document.getElementById('info-box');
             let detalhesExtras = "";
 
             if (dado.tipoConsorcio === "Consórcio Automotivo" || dado.tipoConsorcio === "automotivo") {
-                detalhesExtras = `<span class='text-white'><strong>Modelo:</strong> ${dado.modelo || '-'} | Cor: ${dado.cor || '-'}</span>`;
+                detalhesExtras = `<span class='text-white'><strong>Modelo:</strong> ${dado.modelo || '-'} | <strong>Cor:</strong> ${dado.cor || '-'}</span>`;
             } else if (dado.tipoConsorcio === "Consórcio Residencial") {
                 detalhesExtras = `<span class='text-white'><strong>Tipo do imóvel:</strong> ${dado.tipoImovel || '-'}</span>`;
             }
@@ -137,6 +150,7 @@
                     <p><strong>WhatsApp:</strong> ${dado.whatsapp}</p>
                     <p><strong>Valor:</strong> ${dado.valor || '-'}</p>
                     <p><strong>Tipo de Consórcio:</strong> ${dado.tipoConsorcio}</p>
+                    <p><strong>Origem:</strong> ${dado.origem || '-'}</p>
                     <p>${detalhesExtras}</p>
                     <br>
                     <p><strong>Atendido por:</strong> ${dado.idUsuario || '-'}</p>
@@ -145,7 +159,7 @@
                     <p><strong>Conclusão da solicitação:</strong> ${dado.dataConclusao ? formatarTimestamp(dado.dataConclusao) : '-'} </p>
                     <br>
                     <hr>
-                    <button id="fechar-info" class="mt-4 bg-red-600 px-4 py-2 rounded">Fechar</button>
+                    <button id="fechar-info" class="mt-4 bg-red-600 hover:bg-red-700 px-4 py-2 rounded">Fechar</button>
                 </div>
             `;
             infoBox.classList.remove('hidden');
@@ -195,10 +209,16 @@
 </head>
 <body class="bg-gray-900 text-white p-4 sm:p-8">
     <div class="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
-        <input id="pesquisa" type="text" class="p-2 mb-4 sm:mb-0 rounded bg-gray-800 text-white" placeholder="Pesquisar por nome">
+        <h1 class="text-3xl font-bold">Orçamentos Finalizados</h1>
         <div class="text-lg" id="saudacao"></div>
-        <button id="logout-btn" class="mt-4 sm:mt-0 bg-red-600 text-white px-4 py-2 rounded">Logout</button>
+        <div>
+            <button id="return-btn" class="mt-4 sm:mt-0 bg-yellow-500 hover:bg-yellow-700 text-white px-4 py-2 rounded">Orçamentos em andamento</button>
+            <script>document.getElementById('return-btn').addEventListener('click', function(){document.location.href = 'adm.html'})</script>
+            <button id="logout-btn" class="mt-4 sm:mt-0 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">Logout</button>
+        </div>
     </div>
+
+    <input id="pesquisa" type="text" class="p-2 mb-5 border border-gray-500 rounded bg-gray-800 text-white w-full" placeholder="Pesquisar por nome">
     
     <div class="overflow-x-auto sm:overflow-visible">
         <table class="min-w-full bg-gray-800 rounded-lg shadow-md">
@@ -208,7 +228,7 @@
                     <th class="p-4 text-sm font-semibold sm:text-base">WhatsApp</th>
                     <th class="p-4 text-sm font-semibold sm:text-base">Tipo de Consórcio</th>
                     <th id="ordenar-data" class="p-4 text-sm font-semibold cursor-pointer sm:text-base">Data de Envio</th>
-                    <th class="p-4 text-sm font-semibold sm:text-base">Info</th>
+                    <th class="p-4 text-sm font-semibold sm:text-base text-center">Info</th>
                 </tr>
             </thead>
             <tbody id="tabela-orcamentos-concluidos">
