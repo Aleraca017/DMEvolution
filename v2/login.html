@@ -29,7 +29,8 @@
   <script type="module">
     // Configuração do Firebase
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
-    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+    import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider, signOut } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
+    import { getFirestore, doc, getDoc } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js';
 
     const firebaseConfig = {
       apiKey: "AIzaSyAznTyn2JKhPuM2QOJH91r_k3pl89WtiV8",
@@ -43,13 +44,14 @@
     // Inicializando o Firebase
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
     // Selecionando o formulário de login e o link de recuperar senha
     const loginForm = document.getElementById('login-form');
     const recoverPasswordLink = document.getElementById('recover-password');
     const googleLoginButton = document.getElementById('google-login');
 
-    // Função para lidar com o login
+    // Função para lidar com o login com email e senha
     loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
 
@@ -96,14 +98,26 @@
     googleLoginButton.addEventListener('click', () => {
       const provider = new GoogleAuthProvider();
       signInWithPopup(auth, provider)
-        .then((result) => {
+        .then(async (result) => {
           // Login com Google bem-sucedido
           const user = result.user;
-          alert('Login com Google realizado com sucesso!');
           console.log(user);
 
-          // Redirecionando para a página de administração
-          window.location.href = 'adm.html';  // Aqui ocorre o redirecionamento
+          // Verificando se o email do usuário existe no Firestore
+          const userDoc = await getDoc(doc(db, 'usuarios', user.email));
+
+          if (!userDoc.exists()) {
+            // Se o usuário não existe no sistema, faz logout e exibe mensagem
+            signOut(auth).then(() => {
+              alert('Este email não está autorizado a acessar o sistema.');
+            }).catch((error) => {
+              alert('Erro ao sair: ' + error.message);
+            });
+          } else {
+            // Se o usuário existe no Firestore, redireciona
+            alert('Login com Google realizado com sucesso!');
+            window.location.href = 'adm.html';  // Aqui ocorre o redirecionamento
+          }
         })
         .catch((error) => {
           const errorMessage = error.message;
