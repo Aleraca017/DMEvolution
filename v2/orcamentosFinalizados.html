@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
         const firebaseConfig = {
@@ -23,24 +23,29 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Verificação de autenticação
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "login.html"; // Redireciona se não estiver autenticado
-            } else {
-                mostrarUsuarioLogado(user);
-            }
-        });
 
-        function mostrarUsuarioLogado(user) {
-            const saudacao = document.getElementById("saudacao");
-            const nomeUsuario = user.displayName || user.email; // Exibe o displayName ou email
-            saudacao.innerHTML = `Bem-vindo, ${nomeUsuario}!`;
+        onAuthStateChanged(auth, async (user) => {
+    if (!user) {
+        window.location.href = "login.html"; // Redireciona para a página de login se não estiver autenticado
+    } else {
+        // Verifica no Firestore se o usuário é admin
+        const userDocRef = doc(db, "usuarios", user.uid);
+        const userDoc = await getDoc(userDocRef);
 
+        if (userDoc.exists() && userDoc.data().admin === true) {
+            // O usuário é admin, então ele pode acessar a página de orçamentos
+            mostrarUsuarioLogado(user);
+            carregarOrcamentosConcluidos();
+        } else {
+            // Caso contrário, redireciona para uma página de acesso negado
+            window.location.href = "login.html"; // ou qualquer outra página
         }
+    }
+});
 
         let orcamentosConcluidos = [];
-        let ordemAsc = true;
+        let ordemNomeCrescente = true;
+        let ordemDataCrescente = true;
 
         function carregarOrcamentosConcluidos() {
             onSnapshot(collection(db, "orcamentosConcluidos"), (snapshot) => {
@@ -48,112 +53,173 @@
                 exibirOrcamentosConcluidos(orcamentosConcluidos);
             });
         }
-        
+
+        function mostrarUsuarioLogado(user) {
+    const saudacao = document.getElementById("saudacao");
+
+    // Verifique se o nome do usuário está no Firestore
+    const userDocRef = doc(db, "usuarios", user.uid); // A coleção 'usuarios' deve ter o UID do usuário
+    getDoc(userDocRef).then((docSnapshot) => {
+        if (docSnapshot.exists()) {
+            const nomeUsuario = docSnapshot.data().nome; // Supondo que o nome esteja no campo "nome"
+            saudacao.innerHTML = `Bem-vindo, ${nomeUsuario}!`;
+        } else {
+            saudacao.innerHTML = `Bem-vindo, ${user.email}!`; // Fallback para email caso o nome não seja encontrado
+        }
+    }).catch((error) => {
+        console.error("Erro ao buscar nome do usuário: ", error);
+        saudacao.innerHTML = `Bem-vindo, ${user.email}!`; // Fallback para email em caso de erro
+    });
+
+    const logoutBtn = document.getElementById("logout-btn");
+    logoutBtn.addEventListener("click", () => {
+        signOut(auth).then(() => {
+            window.location.href = "login.html"; // Redireciona para a página de login após logout
+        }).catch((error) => {
+            console.error("Erro ao fazer logout: ", error);
+        });
+    });
+}
+
         function exibirOrcamentosConcluidos(dados) {
             const tabela = document.getElementById("tabela-orcamentos-concluidos");
             tabela.innerHTML = "";
 
             dados.forEach(dado => {
-                let detalhesExtras = "";
-                if (dado.tipoConsorcio === "automotivo") {
-                    detalhesExtras = `<br><span class='text-gray-400 text-sm'>Modelo: ${dado.modelo || '-'} | Cor: ${dado.cor || '-'}</span>`;
-                }
-
                 const tr = document.createElement("tr");
                 tr.classList.add("border-b", "border-gray-700");
 
-                const dataEnvio = dado.dataEnvio.toDate();
-                const dataConclusao = dado.dataConclusao.toDate();
-
-                // Cálculo da diferença em dias e horas
-                const diffMs = dataConclusao - dataEnvio;
-                const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                const diffHours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-
                 tr.innerHTML = `
-                    <td class='p-4'>${dado.nome}</td>
-                    <td class='p-4'>${dado.whatsapp}</td>
-                    <td class='p-4'>${dado.tipoConsorcio}${detalhesExtras}</td>
-                    <td class='p-4'>${dado.valor || '-'}</td>
-                    <td class='p-4'>${dataEnvio.toLocaleDateString()}</td>
-                    <td class='p-4'>${dataConclusao.toLocaleDateString()}</td>
-                    <td class='p-4'>${dado.idUsuario}</td>
-                    <td class='p-4'>${diffDays} dias e ${diffHours} horas</td>
+                    <td class='p-4 text-sm md:text-base'>${dado.nome}</td>
+                    <td class='p-4 text-sm md:text-base'>${dado.whatsapp}</td>
+                    <td class='p-4 text-sm md:text-base'>${dado.tipoConsorcio}</td>
+                    <td class='p-4 text-sm md:text-base'>${dado.dataEnvio ? dado.dataEnvio.toDate().toLocaleDateString() : '-'}</td>
+                    <td class='p-4 text-sm md:text-base'>
+                        <button class='info-btn bg-blue-500 hover:bg-transparent border-blue-500 border w-[120px] text-white px-4 py-2 rounded' data-info='${JSON.stringify(dado)}'>ℹ️</button>
+                    </td>
                 `;
+
                 tabela.appendChild(tr);
+            });
+
+            document.querySelectorAll('.info-btn').forEach(button => {
+                button.addEventListener('click', (e) => {
+                    const dado = JSON.parse(e.target.dataset.info);
+                    exibirInformacoes(dado);
+                });
             });
         }
 
-        document.addEventListener("DOMContentLoaded", () => {
-            carregarOrcamentosConcluidos();
-            document.getElementById("busca").addEventListener("keyup", buscarOrcamentosConcluidos);
-            document.querySelectorAll("th[data-sort]").forEach(th => {
-                th.addEventListener("click", () => ordenarPor(th.dataset.sort));
-            });
-            document.getElementById("logout-btn").addEventListener("click", () => {
-                signOut(auth).then(() => {
-                    window.location.href = "login.html"; // Redireciona após logout
-                }).catch(error => {
-                    console.error("Erro ao sair:", error);
-                });
-            });
-        });
+        function formatarTimestamp(timestamp) {
+            if (timestamp && timestamp.seconds !== undefined && timestamp.nanoseconds !== undefined) {
+                const data = new Date(timestamp.seconds * 1000 + timestamp.nanoseconds / 1000000);
+                return data.toLocaleDateString('pt-BR');
+            }
+            return '-';
+        }
 
-        function buscarOrcamentosConcluidos() {
-            const filtro = document.getElementById("busca").value.toLowerCase();
-            const resultados = orcamentosConcluidos.filter(dado => 
-                dado.nome.toLowerCase().includes(filtro) ||
-                dado.whatsapp.includes(filtro) ||
-                dado.tipoConsorcio.toLowerCase().includes(filtro) ||
-                dado.emailUsuario.toLowerCase().includes(filtro)
-            );
+        function exibirInformacoes(dado) {
+            const infoBox = document.getElementById('info-box');
+            let detalhesExtras = "";
+
+            if (dado.tipoConsorcio === "Consórcio Automotivo" || dado.tipoConsorcio === "automotivo") {
+                detalhesExtras = `<span class='text-white'><strong>Modelo:</strong> ${dado.modelo || '-'} | Cor: ${dado.cor || '-'}</span>`;
+            } else if (dado.tipoConsorcio === "Consórcio Residencial") {
+                detalhesExtras = `<span class='text-white'><strong>Tipo do imóvel:</strong> ${dado.tipoImovel || '-'}</span>`;
+            }
+
+            infoBox.innerHTML = `
+                <div class="bg-gray-800 w-[90%] sm:w-[500px] text-white p-4 rounded-lg">
+                    <h2 class="text-xl font-bold mb-2 text-center">Detalhes do Orçamento</h2>
+                    <hr>
+                    <br>
+                    <p><strong>Nome:</strong> ${dado.nome}</p>
+                    <p><strong>WhatsApp:</strong> ${dado.whatsapp}</p>
+                    <p><strong>Valor:</strong> ${dado.valor || '-'}</p>
+                    <p><strong>Tipo de Consórcio:</strong> ${dado.tipoConsorcio}</p>
+                    <p>${detalhesExtras}</p>
+                    <br>
+                    <p><strong>Atendido por:</strong> ${dado.idUsuario || '-'}</p>
+                    <p><strong>Envio da solicitação:</strong> ${dado.dataConclusao ? formatarTimestamp(dado.dataEnvio) : '-'} </p>
+                    <p><strong>Início da tratativa:</strong> ${dado.dataTratativa ? formatarTimestamp(dado.dataTratativa) : '-'} </p>
+                    <p><strong>Conclusão da solicitação:</strong> ${dado.dataConclusao ? formatarTimestamp(dado.dataConclusao) : '-'} </p>
+                    <br>
+                    <hr>
+                    <button id="fechar-info" class="mt-4 bg-red-600 px-4 py-2 rounded">Fechar</button>
+                </div>
+            `;
+            infoBox.classList.remove('hidden');
+
+            document.getElementById('fechar-info').addEventListener('click', () => {
+                infoBox.classList.add('hidden');
+            });
+        }
+
+        function filtrarOrcamentos() {
+            const pesquisa = document.getElementById('pesquisa').value.toLowerCase();
+            const resultados = orcamentosConcluidos.filter(dado => dado.nome.toLowerCase().includes(pesquisa));
             exibirOrcamentosConcluidos(resultados);
         }
 
-        function ordenarPor(campo) {
-            ordemAsc = !ordemAsc;
+        function ordenarPorNome() {
             orcamentosConcluidos.sort((a, b) => {
-                if (a[campo] < b[campo]) return ordemAsc ? -1 : 1;
-                if (a[campo] > b[campo]) return ordemAsc ? 1 : -1;
-                return 0;
+                if (ordemNomeCrescente) {
+                    return a.nome.localeCompare(b.nome);
+                } else {
+                    return b.nome.localeCompare(a.nome);
+                }
             });
+            ordemNomeCrescente = !ordemNomeCrescente;
             exibirOrcamentosConcluidos(orcamentosConcluidos);
         }
-        document.getElementById('orcamentos-btn').addEventListener('click', function(){
-            window.location.href = 'adm.html'
-        })
+
+        function ordenarPorData() {
+            orcamentosConcluidos.sort((a, b) => {
+                if (ordemDataCrescente) {
+                    return a.dataEnvio.toDate() - b.dataEnvio.toDate();
+                } else {
+                    return b.dataEnvio.toDate() - a.dataEnvio.toDate();
+                }
+            });
+            ordemDataCrescente = !ordemDataCrescente;
+            exibirOrcamentosConcluidos(orcamentosConcluidos);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarOrcamentosConcluidos();
+            document.getElementById('pesquisa').addEventListener('input', filtrarOrcamentos);
+            document.getElementById('ordenar-nome').addEventListener('click', ordenarPorNome);
+            document.getElementById('ordenar-data').addEventListener('click', ordenarPorData);
+        });
     </script>
 </head>
-<body class="bg-gray-900 text-white p-8">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Orçamentos Concluídos</h1>
+<body class="bg-gray-900 text-white p-4 sm:p-8">
+    <div class="mb-4 flex flex-col sm:flex-row sm:justify-between sm:items-center">
+        <input id="pesquisa" type="text" class="p-2 mb-4 sm:mb-0 rounded bg-gray-800 text-white" placeholder="Pesquisar por nome">
         <div class="text-lg" id="saudacao"></div>
-        <button id="orcamentos-btn" class="bg-yellow-500 px-4 py-2 rounded-lg hover:bg-yellow-600">Orçamentos não finalizados</button>
-        <button id="logout-btn" class="bg-red-600 px-4 py-2 rounded-lg hover:bg-red-700">Logout</button>
+        <button id="logout-btn" class="mt-4 sm:mt-0 bg-red-600 text-white px-4 py-2 rounded">Logout</button>
     </div>
-
-    <input type="text" id="busca" placeholder="Buscar..." class="w-full p-3 mb-4 rounded-lg bg-gray-700 text-white border-2 border-gray-600 focus:ring-2 focus:ring-yellow-500">
     
-    <div class="overflow-x-auto">
-        <table class="min-w-full bg-gray-800 rounded-lg overflow-hidden">
+    <div class="overflow-x-auto sm:overflow-visible">
+        <table class="min-w-full bg-gray-800 rounded-lg shadow-md">
             <thead>
-                <tr class="bg-gray-700 text-left">
-                    <th class="p-4 cursor-pointer" data-sort="nome">Nome</th>
-                    <th class="p-4 cursor-pointer" data-sort="whatsapp">WhatsApp</th>
-                    <th class="p-4 cursor-pointer" data-sort="tipoConsorcio">Tipo de Consórcio</th>
-                    <th class="p-4 cursor-pointer" data-sort="valor">Valor</th>
-                    <th class="p-4 cursor-pointer" data-sort="dataEnvio">Data de Envio</th>
-                    <th class="p-4 cursor-pointer" data-sort="dataConclusao">Data de Conclusão</th>
-                    <th class="p-4 cursor-pointer" data-sort="emailUsuario">Email do Usuário</th>
-                    <th class="p-4 cursor-pointer" data-sort="diferencaDias">Diferença de Dias e Horas</th>
+                <tr class="bg-gray-700 text-left text-white">
+                    <th id="ordenar-nome" class="p-4 text-sm font-semibold cursor-pointer sm:text-base">Nome</th>
+                    <th class="p-4 text-sm font-semibold sm:text-base">WhatsApp</th>
+                    <th class="p-4 text-sm font-semibold sm:text-base">Tipo de Consórcio</th>
+                    <th id="ordenar-data" class="p-4 text-sm font-semibold cursor-pointer sm:text-base">Data de Envio</th>
+                    <th class="p-4 text-sm font-semibold sm:text-base">Info</th>
                 </tr>
             </thead>
             <tbody id="tabela-orcamentos-concluidos">
-                <tr>
-                    <td colspan="8" class="text-center p-4">Carregando...</td>
-                </tr>
+                <!-- Os dados da tabela serão preenchidos aqui via JavaScript -->
             </tbody>
         </table>
+    </div>
+
+    <!-- Caixa de Detalhes -->
+    <div id="info-box" class="hidden fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <!-- Detalhes do Orçamento serão exibidos aqui -->
     </div>
 </body>
 </html>

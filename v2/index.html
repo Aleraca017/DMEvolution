@@ -300,10 +300,11 @@
       </section>
     </section>
 
+<!--Seção de serviços-->
+
     <section
       class="relative z-20 bg-gray-800 text-white py-16 scroll-mt-20"
       id="servicos"
-      data-aos="fade-up"
     >
       <div class="container mx-auto text-center">
         <h2 class="text-5xl font-semibold text-yellow-500 mb-8">
@@ -312,7 +313,8 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
           <div
             class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer"
-          >
+            data-aos="flip-left"
+            >
             <img
               src="images/webp/automotivo.webp"
               alt="Consórcios Automotivos"
@@ -324,7 +326,8 @@
 
           <div
             class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer"
-          >
+            data-aos="flip-right"
+            >
             <img
               src="images/webp/residencial.webp"
               alt="Consórcios Residenciais"
@@ -336,7 +339,8 @@
 
           <div
             class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer"
-          >
+            data-aos="flip-left"
+            >
             <img
               src="images/webp/carta-contemplada.webp"
               alt="Consórcios Residenciais"
@@ -353,7 +357,8 @@
 
           <div
             class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer"
-          >
+            data-aos="flip-right"
+            >
             <img
               src="images/webp/capital-giro.webp"
               alt="Consórcios Residenciais"
@@ -368,7 +373,8 @@
 
           <div
             class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer"
-          >
+            data-aos="flip-left"
+            >
             <img
               src="images/webp/home-equity.webp"
               alt="Consórcios Residenciais"
@@ -387,7 +393,8 @@
 
           <div
             class="service-box p-6 bg-gray-700 shadow-lg rounded-xl flex flex-col items-center text-center cursor-pointer"
-          >
+            data-aos="flip-right"
+            >
             <img
               src="images/webp/financiamento.webp"
               alt="Consórcios Residenciais"
@@ -461,7 +468,6 @@
       class="relative z-20 bg-gradient-to-r from-gray-800 to-gray-600 text-white py-16 scroll-mt-20"
       id="contato"
       data-aos="fade-up"
-      data-aos-duration="1500"
     >
       <div class="container mx-auto text-center">
         <h2 class="text-4xl font-semibold text-yellow-500 mb-8">
@@ -513,12 +519,12 @@
                 required
               >
                 <option value="" selected disabled>Selecione</option>
-                <option value="automotivo">Consórcio Automotivo</option>
-                <option value="residencial">Consórcio Residencial</option>
-                <option value="carta_contemplada">Carta Contemplada</option>
-                <option value="capital_giro">Capital de Giro</option>
-                <option value="home_equity">Home Equity</option>
-                <option value="financiamento">Financiamento</option>
+                <option value="Consórcio Automotivo">Consórcio Automotivo</option>
+                <option value="Consórcio Residencial">Consórcio Residencial</option>
+                <option value="Carta Contemplada">Carta Contemplada</option>
+                <option value="Capital de Giro">Capital de Giro</option>
+                <option value="Home Equity">Home Equity</option>
+                <option value="Financiamento">Financiamento</option>
               </select>
             </div>
 
@@ -566,22 +572,22 @@
               const valorInput = '<input name="valor" placeholder="Valor" class="valorInput w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required>';
 
               switch (tipoServico) {
-                  case 'automotivo':
+                  case 'Consórcio Automotivo':
                       campos = `${valorInput}<input name="modelo" placeholder="Modelo" class="w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required><input name="cor" placeholder="Cor" class="w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required>`;
                       break;
-                  case 'residencial':
+                  case 'Consórcio Residencial':
                       campos = `${valorInput}<input name="tipoImovel" placeholder="Tipo de Imóvel" class="w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required>`;
                       break;
-                  case 'carta_contemplada':
-                      campos = `${valorInput}<input name="tipoConsorcio" placeholder="Tipo de Consórcio" class="w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required>`;
+                  case 'Carta Contemplada':
+                      campos = `${valorInput}<input name="tipoSubConsorcio" placeholder="Tipo de Consórcio" class="w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required>`;
                       break;
-                  case 'capital_giro':
-                      campos = `${valorInput}<input name="despesas" placeholder="Despesas" class="w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required>`;
+                  case 'Capital de Giro':
+                      campos = `${valorInput}<input name="despesas" placeholder="Despesas" class="valorInput w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required>`;
                       break;
-                  case 'home_equity':
-                      campos = '<input name="valorAtual" placeholder="Valor do Imóvel Atual" class="valorInput w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required><input name="valorDesejado" placeholder="Valor do Imóvel Desejado" class="valorInput w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required>';
+                  case 'Home Equity':
+                      campos = '<input name="valorAtual" placeholder="Valor do Imóvel Atual" class="valorInput w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required><input name="valor" placeholder="Valor do Imóvel Desejado" class="valorInput w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required>';
                       break;
-                  case 'financiamento':
+                  case 'Financiamento':
                       campos = '<input name="tipoFinanciamento" placeholder="Tipo de Financiamento" class="w-full p-4 rounded-lg bg-gray-600 text-white border-2 border-transparent focus:outline-none focus:ring-2 focus:ring-yellow-500" required>' + valorInput;
                       break;
               }

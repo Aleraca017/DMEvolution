@@ -13,7 +13,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc, deleteDoc, setDoc, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, doc, deleteDoc, setDoc, Timestamp, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
         
         const firebaseConfig = {
@@ -45,19 +45,31 @@
 
         // Função para exibir o nome do usuário logado e o botão de logout
         function mostrarUsuarioLogado(user) {
-            const saudacao = document.getElementById("saudacao");
-            const nomeUsuario = user.displayName || user.email; // Exibe o displayName ou email
-            saudacao.innerHTML = `Bem-vindo, ${nomeUsuario}!`;
+    const saudacao = document.getElementById("saudacao");
 
-            const logoutBtn = document.getElementById("logout-btn");
-            logoutBtn.addEventListener("click", () => {
-                signOut(auth).then(() => {
-                    window.location.href = "login.html"; // Redireciona para a página de login após logout
-                }).catch((error) => {
-                    console.error("Erro ao fazer logout: ", error);
-                });
-            });
+    // Verifique se o nome do usuário está no Firestore
+    const userDocRef = doc(db, "usuarios", user.uid); // A coleção 'usuarios' deve ter o UID do usuário
+    getDoc(userDocRef).then((docSnapshot) => {
+        if (docSnapshot.exists()) {
+            const nomeUsuario = docSnapshot.data().nome; // Supondo que o nome esteja no campo "nome"
+            saudacao.innerHTML = `Bem-vindo, ${nomeUsuario}!`;
+        } else {
+            saudacao.innerHTML = `Bem-vindo, ${user.email}!`; // Fallback para email caso o nome não seja encontrado
         }
+    }).catch((error) => {
+        console.error("Erro ao buscar nome do usuário: ", error);
+        saudacao.innerHTML = `Bem-vindo, ${user.email}!`; // Fallback para email em caso de erro
+    });
+
+    const logoutBtn = document.getElementById("logout-btn");
+    logoutBtn.addEventListener("click", () => {
+        signOut(auth).then(() => {
+            window.location.href = "login.html"; // Redireciona para a página de login após logout
+        }).catch((error) => {
+            console.error("Erro ao fazer logout: ", error);
+        });
+    });
+}
         
         function carregarOrcamentos() {
             onSnapshot(collection(db, "formularios"), (snapshot) => {
@@ -72,10 +84,18 @@
             
             dados.forEach(dado => {
                 let detalhesExtras = "";
-                if (dado.tipoConsorcio === "automotivo") {
-                    detalhesExtras = `<br><span class='text-gray-400 text-sm'>Modelo: ${dado.modelo || '-'} | Cor: ${dado.cor || '-'}</span>`;
-                } else if (dado.tipoConsorcio === "outros"){
-                    detalhesExtras = `<br><span class='text-gray-400 text-sm'>Informações: ${dado.informacoes || '-'}</span>`;
+                if (dado.tipoConsorcio === "Consórcio Automotivo") {
+                    detalhesExtras = `<br><span class='text-gray-400 text-sm'><strong>Modelo:</strong> ${dado.modelo || '-'} | Cor: ${dado.cor || '-'}</span>`;
+                } else if (dado.tipoConsorcio === "automotivo"){
+                    detalhesExtras = `<br><span class='text-gray-400 text-sm'><strong>Modelo:</strong> ${dado.modelo || '-'} | Cor: ${dado.cor || '-'}</span>`;
+                } else if (dado.tipoConsorcio === "Consórcio Residencial"){
+                    detalhesExtras = `<br><span class='text-gray-400 text-sm'><strong>Tipo do imóvel:</strong> ${dado.tipoImovel || '-'}</span>`;
+                } else if (dado.tipoConsorcio === "Carta Contemplada"){
+                    detalhesExtras = `<br><span class='text-gray-400 text-sm'><strong>Tipo:</strong> ${dado.tipoSubConsorcio || '-'}</span>`;
+                } else if (dado.tipoConsorcio === "Capital de Giro"){
+                    detalhesExtras = `<br><span class='text-gray-400 text-sm'><strong>Despesas:</strong> ${dado.despesas || '-'}</span>`;
+                } else if (dado.tipoConsorcio === "Home Equity"){
+                    detalhesExtras = `<br><span class='text-gray-400 text-sm'><strong> Valor do imóvel atual:</strong> ${dado.valorAtual || '-'}</span>`;
                 }
                 
                 // Verifica se o orçamento está em tratativa
@@ -96,31 +116,57 @@
                     <td class='p-4'>${dado.dataEnvio ? dado.dataEnvio.toDate().toLocaleDateString() : '-'}</td>
                     <td class='p-4'>
                         ${dado.emTratativa ? 
-                            `<button class='bg-green-500 text-white px-4 py-2 rounded concluir-btn' data-id='${dado.id}'>Concluir</button>` 
+                            `<button class='bg-green-500 w-[120px] text-white px-4 py-2 rounded concluir-btn' data-id='${dado.id}'>Concluir</button>
+                            <button class='cancelar-tratativa-btn bg-red-500 text-white px-4 py-2 rounded' data-id='${dado.id}'>Cancelar Tratativa</button>
+                            ` 
                             : 
-                            `<button class='bg-blue-500 text-white px-4 py-2 rounded tratar-btn' data-id='${dado.id}'>Em Tratativa</button>`
+                            `<button class='bg-blue-500 w-[120px] text-white px-4 py-2 rounded tratar-btn' data-id='${dado.id}'>Em Tratativa</button>`
                         }
                     </td>
                 `;
                 
                 tabela.appendChild(tr);
 
-                // Adiciona os eventos aos botões
-                document.querySelectorAll(".concluir-btn").forEach(button => {
-                    button.addEventListener("click", async (event) => {
-                        const id = event.target.dataset.id;
-                        concluirOrcamento(id);
-                    });
-                });
+                // Adicionar listeners apenas uma vez
+if (!document.getElementById("tabela-orcamentos").hasAttribute("data-listeners")) {
+    document.getElementById("tabela-orcamentos").addEventListener("click", async (event) => {
+        const target = event.target;
 
-                document.querySelectorAll(".tratar-btn").forEach(button => {
-                    button.addEventListener("click", async (event) => {
-                        const id = event.target.dataset.id;
-                        emTratativaOrcamento(id);
-                    });
-                });
+        if (target.classList.contains("concluir-btn")) {
+            const id = target.dataset.id;
+            await concluirOrcamento(id);
+        }
+
+        if (target.classList.contains("tratar-btn")) {
+            const id = target.dataset.id;
+            await emTratativaOrcamento(id);
+        }
+
+        if (target.classList.contains("cancelar-tratativa-btn")) {
+            const id = target.dataset.id;
+            await cancelarTratativa(id);
+        }
+    });
+
+    // Marcar que os listeners foram adicionados
+    document.getElementById("tabela-orcamentos").setAttribute("data-listeners", "true");
+}
             });
         }
+
+
+        async function cancelarTratativa(id) {
+            const orcamento = orcamentos.find(o => o.id === id);
+            if (orcamento) {
+                orcamento.emTratativa = false;
+                await setDoc(doc(db, "formularios", id), orcamento);
+
+                alert("Orçamento retirado da tratativa")
+            } else {
+                alert("Orçamento não encontrado")
+            }
+        }
+
 
         async function emTratativaOrcamento(id) {
             const orcamento = orcamentos.find(o => o.id === id);
@@ -215,9 +261,9 @@
                 <tr class="bg-gray-700 text-left">
                     <th class="p-4 cursor-pointer" data-sort="nome">Nome</th>
                     <th class="p-4 cursor-pointer" data-sort="whatsapp">WhatsApp</th>
-                    <th class="p-4 cursor-pointer" data-sort="tipoConsorcio">Tipo de Consórcio</th>
-                    <th class="p-4 cursor-pointer" data-sort="valor">Valor</th>
-                    <th class="p-4 cursor-pointer" data-sort="dataEnvio">Data</th>
+                    <th class="p-4 cursor-pointer" data-sort="tipoConsorcio">Tipo de Serviço</th>
+                    <th class="p-4 cursor-pointer" data-sort="valor">Valor Solicitado</th>
+                    <th class="p-4 cursor-pointer" data-sort="dataEnvio">Data da Solicitação</th>
                     <th class="p-4">Ações</th>
                 </tr>
             </thead>
