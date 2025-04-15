@@ -31,15 +31,7 @@
     // Configuração do Firebase
     import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js';
     import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail, signInWithPopup, GoogleAuthProvider } from 'https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js';
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAznTyn2JKhPuM2QOJH91r_k3pl89WtiV8",
-      authDomain: "dmevolution-7639a.firebaseapp.com",
-      projectId: "dmevolution-7639a",
-      storageBucket: "dmevolution-7639a.firebasestorage.app",
-      messagingSenderId: "1060243812509",
-      appId: "1:1060243812509:web:f58d7a5f7c52562e946474"
-    };
+    import { firebaseConfig } from './config.js'
 
     // Inicializando o Firebase
     const app = initializeApp(firebaseConfig);
